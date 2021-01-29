@@ -179,7 +179,7 @@ class AtComponent extends Component {
     ].join(";");
     let navBarLeft = [];
     if (ignoreCapsulePosition) {
-      navBarLeft = [`width: auto`, "position: absolute"].join(";");
+      navBarLeft = [`width: auto`, "position: absolute", "zIndex: 1"].join(";");
     } else if ((back && !home) || (!back && home)) {
       navBarLeft = [
         `width:${capsulePosition.width}px`,
