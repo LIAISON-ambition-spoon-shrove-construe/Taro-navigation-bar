@@ -1,8 +1,8 @@
-import _isFunction from 'lodash/isFunction';
+import _isFunction from "lodash/isFunction";
 import React, { Component } from "react";
 import Taro from "@tarojs/taro";
-import { View } from '@tarojs/components';	
-import './index.scss';
+import { View } from "@tarojs/components";
+import "./index.scss";
 
 function getSystemInfo() {
   if (Taro.globalSystemInfo && !Taro.globalSystemInfo.ios) {
@@ -13,27 +13,29 @@ function getSystemInfo() {
       return null;
     }
     let systemInfo = Taro.getSystemInfoSync() || {
-      model: '',
-      system: ''
+      model: "",
+      system: "",
     };
-    let ios = !!(systemInfo.system.toLowerCase().search('ios') + 1);
+    let ios = !!(systemInfo.system.toLowerCase().search("ios") + 1);
     let rect;
     try {
-      rect = Taro.getMenuButtonBoundingClientRect ? Taro.getMenuButtonBoundingClientRect() : null;
+      rect = Taro.getMenuButtonBoundingClientRect
+        ? Taro.getMenuButtonBoundingClientRect()
+        : null;
       if (rect === null) {
-        throw 'getMenuButtonBoundingClientRect error';
+        throw "getMenuButtonBoundingClientRect error";
       }
       //取值为0的情况  有可能width不为0 top为0的情况
       if (!rect.width || !rect.top || !rect.left || !rect.height) {
-        throw 'getMenuButtonBoundingClientRect error';
+        throw "getMenuButtonBoundingClientRect error";
       }
     } catch (error) {
-      let gap = ''; //胶囊按钮上下间距 使导航内容居中
+      let gap = ""; //胶囊按钮上下间距 使导航内容居中
       let width = 96; //胶囊的宽度
-      if (systemInfo.platform === 'android') {
+      if (systemInfo.platform === "android") {
         gap = 8;
         width = 96;
-      } else if (systemInfo.platform === 'devtools') {
+      } else if (systemInfo.platform === "devtools") {
         if (ios) {
           gap = 5.5; //开发工具中ios手机
         } else {
@@ -45,7 +47,8 @@ function getSystemInfo() {
       }
       if (!systemInfo.statusBarHeight) {
         //开启wifi的情况下修复statusBarHeight值获取不到
-        systemInfo.statusBarHeight = systemInfo.screenHeight - systemInfo.windowHeight - 20;
+        systemInfo.statusBarHeight =
+          systemInfo.screenHeight - systemInfo.windowHeight - 20;
       }
       rect = {
         //获取不到胶囊信息就自定义重置一个
@@ -54,17 +57,18 @@ function getSystemInfo() {
         left: systemInfo.windowWidth - width - 10,
         right: systemInfo.windowWidth - 10,
         top: systemInfo.statusBarHeight + gap,
-        width: width
+        width: width,
       };
-      console.log('error', error);
-      console.log('rect', rect);
+      console.log("error", error);
+      console.log("rect", rect);
     }
 
-    let navBarHeight = '';
+    let navBarHeight = "";
     if (!systemInfo.statusBarHeight) {
       //开启wifi和打电话下
-      systemInfo.statusBarHeight = systemInfo.screenHeight - systemInfo.windowHeight - 20;
-      navBarHeight = (function() {
+      systemInfo.statusBarHeight =
+        systemInfo.screenHeight - systemInfo.windowHeight - 20;
+      navBarHeight = (function () {
         let gap = rect.top - systemInfo.statusBarHeight;
         return 2 * gap + rect.height;
       })();
@@ -72,7 +76,7 @@ function getSystemInfo() {
       systemInfo.statusBarHeight = 0;
       systemInfo.navBarExtendHeight = 0; //下方扩展4像素高度 防止下方边距太小
     } else {
-      navBarHeight = (function() {
+      navBarHeight = (function () {
         let gap = rect.top - systemInfo.statusBarHeight;
         return systemInfo.statusBarHeight + 2 * gap + rect.height;
       })();
@@ -96,18 +100,18 @@ class AtComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      configStyle: this.setStyle(globalSystemInfo)
+      configStyle: this.setStyle(globalSystemInfo),
     };
   }
   static options = {
     multipleSlots: true,
-    addGlobalClass: true
+    addGlobalClass: true,
   };
   componentDidShow() {
     if (globalSystemInfo.ios) {
       globalSystemInfo = getSystemInfo();
       this.setState({
-        configStyle: this.setStyle(globalSystemInfo)
+        configStyle: this.setStyle(globalSystemInfo),
       });
     }
   }
@@ -118,7 +122,7 @@ class AtComponent extends Component {
       const pages = Taro.getCurrentPages();
       if (pages.length >= 2) {
         Taro.navigateBack({
-          delta: this.props.delta
+          delta: this.props.delta,
         });
       }
     }
@@ -134,25 +138,36 @@ class AtComponent extends Component {
     }
   }
   static defaultProps = {
-    extClass: '',
-    background: 'rgba(255,255,255,1)', //导航栏背景
-    color: '#000000',
-    title: '',
-    searchText: '点我搜索',
+    extClass: "",
+    background: "rgba(255,255,255,1)", //导航栏背景
+    color: "#000000",
+    title: "",
+    searchText: "点我搜索",
     searchBar: false,
     back: false,
     home: false,
-    iconTheme: 'black',
-    delta: 1
+    iconTheme: "black",
+    delta: 1,
   };
 
   state = {};
 
   setStyle(systemInfo) {
-    const { statusBarHeight, navBarHeight, capsulePosition, navBarExtendHeight, ios, windowWidth } = systemInfo;
-    const { back, home, title, color, lw } = this.props;
-    let rightDistance = windowWidth - capsulePosition.right; //胶囊按钮右侧到屏幕右侧的边距
-    let leftWidth = lw || windowWidth - capsulePosition.left; //胶囊按钮左侧到屏幕右侧的边距
+    const {
+      statusBarHeight,
+      navBarHeight,
+      capsulePosition,
+      navBarExtendHeight,
+      ios,
+      windowWidth,
+    } = systemInfo;
+    const { back, home, title, color, ignoreCapsulePosition } = this.props;
+    let rightDistance = ignoreCapsulePosition
+      ? 0
+      : windowWidth - capsulePosition.right; //胶囊按钮右侧到屏幕右侧的边距
+    let leftWidth = ignoreCapsulePosition
+      ? 0
+      : windowWidth - capsulePosition.left; //胶囊按钮左侧到屏幕右侧的边距
 
     let navigationbarinnerStyle = [
       `color:${color}`,
@@ -160,24 +175,26 @@ class AtComponent extends Component {
       `height:${navBarHeight + navBarExtendHeight}px`,
       `padding-top:${statusBarHeight}px`,
       `padding-right:${leftWidth}px`,
-      `padding-bottom:${navBarExtendHeight}px`
-    ].join(';');
+      `padding-bottom:${navBarExtendHeight}px`,
+    ].join(";");
     let navBarLeft = [];
-    if ((back && !home) || (!back && home)) {
+    if (ignoreCapsulePosition) {
+      navBarLeft = [`width: auto`, "position: absolute"].join(";");
+    } else if ((back && !home) || (!back && home)) {
       navBarLeft = [
         `width:${capsulePosition.width}px`,
         `height:${capsulePosition.height}px`,
         `margin-left:0px`,
-        `margin-right:${rightDistance}px`
-      ].join(';');
+        `margin-right:${rightDistance}px`,
+      ].join(";");
     } else if ((back && home) || title) {
       navBarLeft = [
         `width:${capsulePosition.width}px`,
         `height:${capsulePosition.height}px`,
-        `margin-left:${rightDistance}px`
-      ].join(';');
+        `margin-left:${rightDistance}px`,
+      ].join(";");
     } else {
-      navBarLeft = [`width:auto`, `margin-left:0px`].join(';');
+      navBarLeft = [`width:auto`, `margin-left:0px`].join(";");
     }
     return {
       navigationbarinnerStyle,
@@ -186,7 +203,7 @@ class AtComponent extends Component {
       capsulePosition,
       navBarExtendHeight,
       ios,
-      rightDistance
+      rightDistance,
     };
   }
 
@@ -198,7 +215,7 @@ class AtComponent extends Component {
       capsulePosition,
       navBarExtendHeight,
       ios,
-      rightDistance
+      rightDistance,
     } = this.state.configStyle;
     const {
       title,
@@ -209,7 +226,7 @@ class AtComponent extends Component {
       searchBar,
       searchText,
       iconTheme,
-      extClass
+      extClass,
     } = this.props;
     let nav_bar__center = null;
     if (title) {
@@ -217,12 +234,12 @@ class AtComponent extends Component {
     } else if (searchBar) {
       nav_bar__center = (
         <View
-          className='lxy-nav-bar-search'
+          className="lxy-nav-bar-search"
           style={`height:${capsulePosition.height}px;`}
           onClick={this.handleSearchClick.bind(this)}
         >
-          <View className='lxy-nav-bar-search__icon' />
-          <View className='lxy-nav-bar-search__input'>{searchText}</View>
+          <View className="lxy-nav-bar-search__icon" />
+          <View className="lxy-nav-bar-search__input">{searchText}</View>
         </View>
       );
     } else {
@@ -232,19 +249,20 @@ class AtComponent extends Component {
     }
     return (
       <View
-        className={`lxy-nav-bar ${ios ? 'ios' : 'android'} ${extClass}`}
-        style={`background: ${backgroundColorTop ? backgroundColorTop : background};height:${navBarHeight +
-          navBarExtendHeight}px;`}
+        className={`lxy-nav-bar ${ios ? "ios" : "android"} ${extClass}`}
+        style={`background: ${
+          backgroundColorTop ? backgroundColorTop : background
+        };height:${navBarHeight + navBarExtendHeight}px;`}
       >
         <View
-          className={`lxy-nav-bar__placeholder ${ios ? 'ios' : 'android'}`}
+          className={`lxy-nav-bar__placeholder ${ios ? "ios" : "android"}`}
           style={`padding-top: ${navBarHeight + navBarExtendHeight}px;`}
         />
         <View
-          className={`lxy-nav-bar__inner ${ios ? 'ios' : 'android'}`}
+          className={`lxy-nav-bar__inner ${ios ? "ios" : "android"}`}
           style={`background:${background};${navigationbarinnerStyle};`}
         >
-          <View className='lxy-nav-bar__left' style={navBarLeft}>
+          <View className="lxy-nav-bar__left" style={navBarLeft}>
             {back && !home && (
               <View
                 onClick={this.handleBackClick.bind(this)}
@@ -258,7 +276,9 @@ class AtComponent extends Component {
               />
             )}
             {back && home && (
-              <View className={`lxy-nav-bar__buttons ${ios ? 'ios' : 'android'}`}>
+              <View
+                className={`lxy-nav-bar__buttons ${ios ? "ios" : "android"}`}
+              >
                 <View
                   onClick={this.handleBackClick.bind(this)}
                   className={`lxy-nav-bar__button lxy-nav-bar__btn_goback ${iconTheme}`}
@@ -271,10 +291,16 @@ class AtComponent extends Component {
             )}
             {!back && !home && this.props.renderLeft}
           </View>
-          <View className='lxy-nav-bar__center' style={`padding-left: ${rightDistance}px`}>
+          <View
+            className="lxy-nav-bar__center"
+            style={`padding-left: ${rightDistance}px`}
+          >
             {nav_bar__center}
           </View>
-          <View className='lxy-nav-bar__right' style={`margin-right: ${rightDistance}px`}>
+          <View
+            className="lxy-nav-bar__right"
+            style={`margin-right: ${rightDistance}px`}
+          >
             {this.props.renderRight}
           </View>
         </View>
